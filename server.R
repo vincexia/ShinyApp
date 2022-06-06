@@ -1,9 +1,9 @@
 ##
 library(shiny)
+library(ggplot2)
 shinyServer(function(input, output) {
-    mtcars$wtsp <- ifelse(mtcars$wt - 3.5 > 0, mtcars$wt - 3.5, 0)
     model1 <- lm(mpg ~ wt, data = mtcars)
-    model2 <- lm(mpg ~ wtsp + wt, data = mtcars)
+    model2 <- lm(mpg ~ wt + cyl, data = mtcars)
     
     model1pred <- reactive({
         wtInput <- input$sliderWeight
@@ -12,10 +12,10 @@ shinyServer(function(input, output) {
     
     model2pred <- reactive({
         wtInput <- input$sliderWeight
+        cylInput <- input$selectCylinder
         predict(model2, newdata = 
                     data.frame(wt = wtInput,
-                               wtsp = ifelse(wtInput - 3.5 > 0,
-                                              wtInput - 3.5, 0)))
+                               cyl = as.numeric(cylInput)))
     })
     
     output$plot1 <- renderPlot({
@@ -27,17 +27,22 @@ shinyServer(function(input, output) {
         if(input$showModel1){
             abline(model1, col = "red", lwd = 2)
         }
-        if(input$showModel2){
-            model2lines <- predict(model2, newdata = data.frame(
-                wt = 1.5:6, wtsp = ifelse(1.5:6 - 3.5 > 0, 1.5:6 - 3.5, 0)
-            ))
-            lines(1.5:6, model2lines, col = "blue", lwd = 2)
-        }
         
         legend("topright", c("Model 1 Prediction", "Model 2 Prediction"), pch = 16, 
                col = c("red", "blue"), bty = "n", cex = 1.2)
         points(wtInput, model1pred(), col = "red", pch = 16, cex = 2)
-        points(wtInput, model2pred(), col = "blue", pch = 16, cex = 2)
+    })
+    
+    output$plot2 <- renderPlot({
+        wtInput <- input$sliderWeight
+        
+        g <- ggplot(data = mtcars, aes(x=wt, y=mpg, group=cyl, color=as.factor(cyl))) +
+            geom_point()
+        g
+        if(input$showModel2){
+            g + geom_smooth(method = "lm") +
+                geom_point(aes(x=wtInput, y=model2pred()), colour="blue", size = 4)
+        }
     })
     
     output$pred1 <- renderText({
