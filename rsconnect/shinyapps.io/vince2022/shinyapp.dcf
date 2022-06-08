@@ -1,0 +1,11 @@
+name: shinyapp
+title:
+username:
+account: vince2022
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6432831
+bundleId: 5989269
+url: https://vince2022.shinyapps.io/shinyapp/
+when: 1654696321.76353
+lastSyncTime: 1654696321.76354

@@ -3,7 +3,7 @@ library(shiny)
 library(ggplot2)
 shinyServer(function(input, output) {
     model1 <- lm(mpg ~ wt, data = mtcars)
-    model2 <- lm(mpg ~ wt + cyl, data = mtcars)
+    model2 <- lm(mpg ~ wt + as.factor(cyl), data = mtcars)
     
     model1pred <- reactive({
         wtInput <- input$sliderWeight

@@ -1,55 +1,42 @@
 ---
-title: "Shiny App Presentation"
-author: "Xia Wenwen"
-date: "6/5/2022"
+title: "Shiny App Presentation"  
+author: "Xia Wenwen"  
+date: "6/8/2022"  
 output: slidy_presentation
 ---
 
 ```{r setup, include=FALSE}
+library(ggplot2)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ## Introduction
 
-The Shiny application shows the predictions of MPG based on the weight in mtcars dataset.  
+The Shiny application shows the predictions of MPG based on the weight and cylinder in mtcars dataset.  
 
-The 1st model is the linear model of mpg over wt.  
+The 1st model is the linear model of mpg over wt, where wt is the weight in 1000 lbs.  
 
-The 2nd model is the linear model of mpg over wt and wtsp, where wtsp takes the threshold value 3.5 in wt. If wt is larger than 3.5, wtsp is the difference below wt and 3.5, otherwise wtsp is zero.  
+The 2nd model is the linear model of mpg over wt and cyl, where cyl is the number of cylinders with selection of value 4, 6 or 8.  
 
-
-## Data Exploration
-
-Here is the view of some records in mtcars.  
-
-```{r data }
-head(mtcars)
-```
-The weight predictor (wt) is used to predict the mpg using linear models.  
-
-## Models
+## Data and Models
 ```{r cars, echo = TRUE}
-mtcars$wtsp <- ifelse(mtcars$wt - 3.5 > 0, mtcars$wt - 3.5, 0)
+head(mtcars)
 model1 <- lm(mpg ~ wt, data = mtcars)
-model2 <- lm(mpg ~ wtsp + wt, data = mtcars)
-model1
-model2
+model2 <- lm(mpg ~ wt + as.factor(cyl), data = mtcars)
 ```
 
-## Plots
-
-```{r pressure, echo = FALSE}
+## Model 1 Plot
+```{r model1, echo = FALSE}
 plot(mtcars$wt, mtcars$mpg, xlab = "Weight (1000 lbs)", 
              ylab = "Miles/(US) gallon", bty = "n", pch = 16, 
              xlim = c(1.5, 6), ylim = c(10, 35))
+
 abline(model1, col = "red", lwd = 2)
-
-model2lines <- predict(model2, newdata = data.frame(
-                wt = 1.5:6, wtsp = ifelse(1.5:6 - 3.5 > 0, 1.5:6 - 3.5, 0)
-            ))
-lines(1.5:6, model2lines, col = "blue", lwd = 2)
-
-legend("topright", c("Model 1 Prediction", "Model 2 Prediction"), pch = 16, 
-               col = c("red", "blue"), bty = "n", cex = 1.2)
 ```
 
+## Model 2 Plot
+```{r model2, echo = FALSE, message = FALSE}
+g <- ggplot(data = mtcars, aes(x=wt, y=mpg, group=cyl, color=as.factor(cyl))) +
+            geom_point() + geom_smooth(method = "lm")
+g
+```
